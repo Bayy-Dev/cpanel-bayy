@@ -1,0 +1,16 @@
+{
+  "name": "pterobot-panel",
+  "version": "2.0.0",
+  "description": "PteroBot Panel - Multi Role Pterodactyl Management",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node api/index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "node-fetch": "^2.7.0"
+  }
+}
