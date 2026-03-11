@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07070f">
+<title>PteroBot Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07070f; --s1:#0e0e1a; --s2:#151524; --s3:#1c1c30;
+  --b1:#242438; --b2:#2e2e48; --b3:#3a3a58;
+  --t1:#f2f2ff; --t2:#8888b0; --t3:#44445a;
+  --sans:'Figtree',sans-serif; --mono:'JetBrains Mono',monospace;
+  --nh:56px; --nb:66px;
+  --st:env(safe-area-inset-top,0px); --sb:env(safe-area-inset-bottom,0px);
+  /* role */
+  --ceo:#ff3d6b; --owner:#ff7a2f; --pt:#f5c518;
+  --res:#00e09e; --adm:#0ea5e9; --usr:#6b6b8a;
+  /* accent default */
+  --ac:#00e09e;
+}
+*,::before,::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--t1);font-family:var(--sans);min-height:100vh;overscroll-behavior:none}
+
+/* ── LOGIN ── */
+#login{position:fixed;inset:0;z-index:600;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px}
+.ln-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0,224,158,.07) 0%,transparent 70%);pointer-events:none}
+.ln-logo{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:44px}
+.ln-icon{width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#6c5ce7,#00e09e);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 12px 40px rgba(108,92,231,.3)}
+.ln-title{font-size:28px;font-weight:900;letter-spacing:-.5px}
+.ln-sub{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+.ln-form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}
+.ln-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;display:block;margin-bottom:6px}
+.ln-inp{width:100%;background:var(--s2);border:1.5px solid var(--b1);border-radius:14px;padding:14px 16px;color:var(--t1);font-family:var(--sans);font-size:15px;transition:border-color .2s,box-shadow .2s}
+.ln-inp:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,224,158,.1)}
+.ln-inp::placeholder{color:var(--t3)}
+.ln-btn{width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#6c5ce7,#00e09e);color:#fff;font-family:var(--sans);font-weight:700;font-size:15px;cursor:pointer;transition:opacity .15s,transform .15s;box-shadow:0 6px 24px rgba(108,92,231,.3);margin-top:4px}
+.ln-btn:active{transform:scale(.97);opacity:.9}
+.ln-btn:disabled{opacity:.6}
+.ln-err{color:var(--ceo);font-size:12px;text-align:center;font-family:var(--mono);padding:4px}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:90;height:calc(var(--nh) + var(--st));padding-top:var(--st);background:rgba(7,7,15,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding-left:14px;padding-right:14px;justify-content:space-between}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.hav{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;font-family:var(--mono)}
+.hname{font-size:14px;font-weight:700}
+.hrole{font-family:var(--mono);font-size:9px;margin-top:1px}
+.hdr-r{display:flex;gap:7px}
+.hbtn{width:34px;height:34px;border-radius:9px;background:var(--s2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:background .15s}
+.hbtn:active{background:var(--b1)}
+
+/* ── SCROLL ── */
+.scroll{height:calc(100dvh - var(--nh) - var(--st) - var(--nb) - var(--sb));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 13px calc(var(--nb) + 16px + var(--sb))}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;height:calc(var(--nb) + var(--sb));padding-bottom:var(--sb);background:rgba(7,7,15,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--b1);display:flex;align-items:center}
+.nw{display:flex;width:100%;padding:0 4px}
+.nt{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;cursor:pointer;border-radius:12px;position:relative;transition:background .15s}
+.nt:active{background:var(--s2)}
+.ni{font-size:21px;line-height:1;transition:transform .2s}
+.nl{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.3px;transition:color .2s}
+.nt.on .ni{transform:scale(1.15)}
+.nt.on .nl{color:var(--ac)}
+.nt.on::before{content:'';position:absolute;top:2px;width:20px;height:3px;background:var(--ac);border-radius:0 0 4px 4px;box-shadow:0 0 10px var(--ac)}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:calc(var(--nb) + 13px + var(--sb));right:14px;z-index:80;width:50px;height:50px;border-radius:15px;border:none;background:linear-gradient(135deg,#6c5ce7,var(--ac));color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 22px rgba(108,92,231,.4);transition:transform .15s}
+.fab:active{transform:scale(.9)}
+.fab.off{display:none}
+
+/* ── PAGE ── */
+.page{display:none}.page.on{display:block}
+.ph{padding:14px 2px 0;margin-bottom:14px}
+.pt{font-size:23px;font-weight:900;letter-spacing:-.5px}
+.ps{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;margin-top:3px;text-transform:uppercase}
+
+/* ── STATS ── */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.sc{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:14px;position:relative;overflow:hidden;transition:transform .15s}
+.sc:active{transform:scale(.97)}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.sc.a::after{background:linear-gradient(90deg,#6c5ce7,transparent)}
+.sc.b::after{background:linear-gradient(90deg,var(--ac),transparent)}
+.sc.c::after{background:linear-gradient(90deg,var(--pt),transparent)}
+.sc.d::after{background:linear-gradient(90deg,var(--ceo),transparent)}
+.sl{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.sv{font-size:33px;font-weight:900;letter-spacing:-2px;line-height:1}
+.sc.a .sv{color:#6c5ce7}.sc.b .sv{color:var(--ac)}.sc.c .sv{color:var(--pt)}.sc.d .sv{color:var(--ceo)}
+.sic{position:absolute;right:12px;top:12px;font-size:24px;opacity:.1}
+
+/* ── SECTION ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px}
+.st{font-size:12px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:6px}
+.sl2{font-family:var(--mono);font-size:10px;color:var(--ac);cursor:pointer;padding:4px 8px;border-radius:6px}
+.sl2:active{background:rgba(0,224,158,.1)}
+
+/* ── SEARCH ── */
+.srch{display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:9px 13px;margin-bottom:12px}
+.srch input{background:none;border:none;color:var(--t1);font-family:var(--sans);font-size:14px;flex:1;outline:none}
+.srch input::placeholder{color:var(--t3)}
+
+/* ── FILTER PILLS ── */
+.fps{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.fps::-webkit-scrollbar{display:none}
+.fp{flex-shrink:0;padding:5px 13px;border-radius:20px;font-family:var(--mono);font-size:10px;font-weight:600;background:var(--s2);border:1px solid var(--b1);color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap}
+.fp.on{background:rgba(0,224,158,.1);border-color:var(--ac);color:var(--ac)}
+.fp:active{opacity:.7}
+
+/* ── ROLE BADGES ── */
+.rb{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.rb-ceo     {background:rgba(255,61,107,.15);color:var(--ceo);border:1px solid rgba(255,61,107,.3)}
+.rb-owner   {background:rgba(255,122,47,.15);color:var(--owner);border:1px solid rgba(255,122,47,.3)}
+.rb-pt      {background:rgba(245,197,24,.15);color:var(--pt);border:1px solid rgba(245,197,24,.3)}
+.rb-reseller{background:rgba(0,224,158,.12);color:var(--res);border:1px solid rgba(0,224,158,.3)}
+.rb-admin   {background:rgba(14,165,233,.12);color:var(--adm);border:1px solid rgba(14,165,233,.3)}
+.rb-user    {background:rgba(107,107,138,.12);color:var(--usr);border:1px solid rgba(107,107,138,.3)}
+.s-active   {background:rgba(0,224,158,.1);color:#00e09e;border:1px solid rgba(0,224,158,.3)}
+.s-suspended{background:rgba(255,61,107,.1);color:var(--ceo);border:1px solid rgba(255,61,107,.3)}
+
+/* ── USER CARD ── */
+.ucard{background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:9px;cursor:pointer;transition:border-color .15s}
+.ucard:active{background:var(--s2)}
+.uc-body{padding:13px}
+.uc-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px}
+.uav{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;font-family:var(--mono)}
+.uav-ceo     {background:linear-gradient(135deg,var(--ceo),var(--owner))}
+.uav-owner   {background:linear-gradient(135deg,var(--owner),var(--pt))}
+.uav-pt      {background:linear-gradient(135deg,var(--pt),var(--res))}
+.uav-reseller{background:linear-gradient(135deg,var(--res),#00bcd4)}
+.uav-admin   {background:linear-gradient(135deg,var(--adm),#6c5ce7)}
+.uav-user    {background:linear-gradient(135deg,#555,#777)}
+.uname{font-size:14px;font-weight:700;line-height:1.2}
+.uemail{font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.umeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.chip{display:inline-flex;align-items:center;gap:3px;background:var(--s2);border:1px solid var(--b1);border-radius:5px;padding:2px 7px;font-family:var(--mono);font-size:9px;color:var(--t2)}
+.pbar{display:flex;align-items:center;gap:7px;margin-top:8px}
+.pbl{font-family:var(--mono);font-size:9px;color:var(--t3);width:32px;text-transform:uppercase}
+.pbt{flex:1;height:4px;background:var(--b1);border-radius:2px;overflow:hidden}
+.pbf{height:100%;border-radius:2px;background:linear-gradient(90deg,#6c5ce7,var(--ac));transition:width .5s}
+.pbv{font-family:var(--mono);font-size:9px;color:var(--t2);width:54px;text-align:right}
+
+/* ── SERVER CARD ── */
+.svcard{background:var(--s1);border:1px solid var(--b1);border-radius:14px;margin-bottom:9px;cursor:pointer}
+.svcard:active{background:var(--s2)}
+.svc-body{padding:13px}
+.svc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.svname{font-size:15px;font-weight:700}
+.svuuid{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:2px}
+.svchips{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:10px;border:1px solid var(--b1);background:var(--s2);color:var(--t1);font-family:var(--sans);font-weight:600;font-size:12px;cursor:pointer;transition:all .15s}
+.btn:active{opacity:.7;transform:scale(.96)}
+.btn-full{width:100%;padding:13px;font-size:14px;border-radius:13px}
+.bp{background:#6c5ce7;border-color:#6c5ce7;color:#fff}
+.bg{background:rgba(0,224,158,.1);border-color:var(--res);color:var(--res)}
+.bc{background:rgba(14,165,233,.1);border-color:var(--adm);color:var(--adm)}
+.br{background:rgba(255,61,107,.1);border-color:var(--ceo);color:var(--ceo)}
+.bo{background:rgba(255,122,47,.1);border-color:var(--owner);color:var(--owner)}
+.by{background:rgba(245,197,24,.1);border-color:var(--pt);color:var(--pt)}
+
+/* ── SHEET ── */
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(5px)}
+.ovl.on{display:flex}
+.sheet{width:100%;background:var(--s1);border-radius:22px 22px 0 0;border-top:1px solid var(--b2);max-height:93vh;display:flex;flex-direction:column;animation:sup .28s cubic-bezier(.34,1.56,.64,1)}
+@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh-drag{width:38px;height:4px;background:var(--b2);border-radius:2px;margin:11px auto 0;flex-shrink:0}
+.sh-hd{padding:14px 20px 12px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sh-tl{font-size:17px;font-weight:800}
+.sh-x{width:28px;height:28px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:var(--t2)}
+.sh-bd{padding:16px 20px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.sh-bd::-webkit-scrollbar{display:none}
+.sh-ft{padding:12px 20px calc(14px + var(--sb));border-top:1px solid var(--b1);display:flex;gap:10px;flex-shrink:0}
+
+/* ── FORM ── */
+.ff{margin-bottom:14px}
+.fl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.fi,.fs{width:100%;background:var(--bg);border:1.5px solid var(--b1);border-radius:11px;padding:11px 13px;color:var(--t1);font-family:var(--sans);font-size:14px;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+.fi:focus,.fs:focus{outline:none;border-color:#6c5ce7;box-shadow:0 0 0 3px rgba(108,92,231,.1)}
+.fi::placeholder{color:var(--t3)}
+.fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2344445a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.fs option{background:var(--s1)}
+.fh{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:4px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── ACTION MENU ── */
+.amov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:299;backdrop-filter:blur(4px);display:none}
+.amov.on{display:block}
+.am{position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--s1);border-radius:22px 22px 0 0;border-top:1px solid var(--b1);padding:0 12px calc(14px + var(--sb));transform:translateY(100%);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+.am.on{transform:translateY(0)}
+.am-drag{width:38px;height:4px;background:var(--b2);border-radius:2px;margin:10px auto 5px}
+.am-lbl{font-size:11px;font-family:var(--mono);color:var(--t3);text-align:center;padding:5px 8px 10px}
+.ai{display:flex;align-items:center;gap:13px;padding:13px 7px;border-radius:12px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .15s}
+.ai:last-child{border-bottom:none}
+.ai:active{background:var(--s2)}
+.aii{width:37px;height:37px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.aig{background:rgba(0,224,158,.1)}.aio{background:rgba(255,122,47,.1)}.aic{background:rgba(14,165,233,.1)}.air{background:rgba(255,61,107,.1)}.aiy{background:rgba(245,197,24,.1)}
+.ai-lbl{font-size:14px;font-weight:600}.ai-dsc{font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:1px}
+.ai-lbl.red{color:var(--ceo)}
+
+/* ── PACKAGE GRID ── */
+.pkgs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.pkg{background:var(--s1);border:2px solid var(--b1);border-radius:13px;padding:13px 11px;cursor:pointer;text-align:center;transition:all .15s;position:relative}
+.pkg:active{transform:scale(.96)}
+.pkg.on{border-color:#6c5ce7;background:rgba(108,92,231,.07)}
+.pkg.on::after{content:'✓';position:absolute;top:7px;right:9px;font-size:12px;color:#6c5ce7;font-weight:800}
+.pkg-n{font-size:19px;font-weight:900;letter-spacing:-.5px;margin-bottom:3px}
+.pkg-tag{font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.pkg-specs{margin-top:9px;display:flex;flex-direction:column;gap:3px}
+.pkg-s{font-family:var(--mono);font-size:9px;color:var(--t2)}
+
+/* ── ROLE PICKER ── */
+.rpick{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.rpc{background:var(--s1);border:1.5px solid var(--b1);border-radius:13px;padding:13px;cursor:pointer;display:flex;align-items:center;gap:13px;transition:border-color .2s}
+.rpc:active{background:var(--s2)}
+.rpc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rpc-name{font-size:15px;font-weight:700}
+.rpc-desc{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:2px}
+.rpc-arr{font-size:18px;color:var(--t3);margin-left:auto}
+
+/* ── HIERARCHY CARD ── */
+.hier{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:15px;margin-bottom:12px}
+.hr-row{display:flex;align-items:center;gap:10px;padding:8px 0;position:relative}
+.hr-row:not(:last-child)::after{content:'';position:absolute;left:16px;bottom:-8px;width:2px;height:16px;background:var(--b1)}
+.hr-dot{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0}
+.hr-name{font-size:13px;font-weight:700}
+.hr-desc{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:2px}
+
+/* ── INFO ROWS ── */
+.ir{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b1)}
+.ir:last-child{border-bottom:none}
+.ik{font-family:var(--mono);font-size:10px;color:var(--t3)}
+.iv{font-size:13px;font-weight:600}
+
+/* ── LOG ITEM ── */
+.li{padding:10px 0;border-bottom:1px solid var(--b1);display:flex;gap:10px}
+.li:last-child{border-bottom:none}
+.li-ic{font-size:16px;width:22px;flex-shrink:0;margin-top:2px}
+.li-ac{font-size:12px;font-weight:600}
+.li-mt{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:2px}
+
+/* ── EMPTY / SKELETON ── */
+.empty{text-align:center;padding:44px 20px}
+.ei{font-size:42px;opacity:.2;margin-bottom:10px}
+.et{font-size:11px;color:var(--t3);font-family:var(--mono)}
+.skel{background:linear-gradient(90deg,var(--s1) 25%,var(--s2) 50%,var(--s1) 75%);background-size:200% 100%;animation:shim 1.2s infinite;border-radius:14px}
+@keyframes shim{to{background-position:-200% 0}}
+
+/* ── TOAST ── */
+.toasts{position:fixed;top:calc(64px + var(--st));left:12px;right:12px;z-index:999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{padding:11px 14px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;border:1px solid;animation:tf .3s ease;pointer-events:auto}
+@keyframes tf{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.tok{background:rgba(0,224,158,.1);border-color:rgba(0,224,158,.3);color:#00e09e}
+.terr{background:rgba(255,61,107,.1);border-color:rgba(255,61,107,.3);color:var(--ceo)}
+.tinf{background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.3);color:var(--adm)}
+
+/* ── DIV ── */
+.div{height:1px;background:var(--b1);margin:13px 0}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login">
+  <div class="ln-bg"></div>
+  <div class="ln-logo">
+    <div class="ln-icon">🦕</div>
+    <div class="ln-title">PteroBot Panel</div>
+    <div class="ln-sub">Multi-Role Control System</div>
+  </div>
+  <div class="ln-form">
+    <div><label class="ln-lbl">Username / Email</label><input class="ln-inp" id="l-u" type="text" placeholder="username atau email" autocomplete="username"></div>
+    <div><label class="ln-lbl">Password</label><input class="ln-inp" id="l-p" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <div id="l-err" class="ln-err" style="display:none"></div>
+    <button class="ln-btn" id="l-btn" onclick="doLogin()">Masuk →</button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app" style="display:none">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-l">
+      <div class="hav" id="h-av"></div>
+      <div><div class="hname" id="h-nm"></div><div class="hrole" id="h-rl"></div></div>
+    </div>
+    <div class="hdr-r">
+      <div class="hbtn" onclick="loadPage(CUR)">↺</div>
+      <div class="hbtn" onclick="doLogout()">⏻</div>
+    </div>
+  </header>
+
+  <!-- SCROLL -->
+  <div class="scroll" id="scroll">
+
+    <!-- PAGE DASH -->
+    <div id="pg-dash" class="page on">
+      <div class="ph"><div class="pt" id="d-greet">Dashboard</div><div class="ps" id="d-sub">—</div></div>
+      <div class="sgrid" id="d-stats">
+        <div class="sc a skel" style="height:86px"></div><div class="sc b skel" style="height:86px"></div>
+        <div class="sc c skel" style="height:86px"></div><div class="sc d skel" style="height:86px"></div>
+      </div>
+      <div id="d-extra"></div>
+    </div>
+
+    <!-- PAGE USERS -->
+    <div id="pg-users" class="page">
+      <div class="ph"><div class="pt">Downline</div><div class="ps" id="u-sub">— AKUN</div></div>
+      <div class="srch"><span>🔍</span><input id="u-q" placeholder="Cari username / email..." oninput="filterUsers()"></div>
+      <div class="fps" id="u-filters"></div>
+      <div id="u-list"></div>
+    </div>
+
+    <!-- PAGE CREATE -->
+    <div id="pg-create" class="page">
+      <div class="ph"><div class="pt">Buat Akun</div><div class="ps" id="cr-sub">PILIH ROLE</div></div>
+      <div id="cr-picker"></div>
+      <div id="cr-form" style="display:none">
+        <div class="div"></div>
+        <div class="f2">
+          <div class="ff"><label class="fl">Username</label><input type="text" class="fi" id="c-u" placeholder="johndoe"></div>
+          <div class="ff"><label class="fl">Email</label><input type="email" class="fi" id="c-e" placeholder="john@x.com"></div>
+        </div>
+        <div class="f2">
+          <div class="ff"><label class="fl">Nama Depan</label><input type="text" class="fi" id="c-fn" placeholder="John"></div>
+          <div class="ff"><label class="fl">Nama Belakang</label><input type="text" class="fi" id="c-ln" placeholder="Doe"></div>
+        </div>
+        <div class="ff"><label class="fl">Password</label><input type="password" class="fi" id="c-pw" placeholder="Min. 6 karakter"></div>
+        <div id="c-pkg-sec" style="display:none">
+          <label class="fl" style="margin-bottom:10px">Pilih Paket Storage</label>
+          <div class="pkgs" id="c-pkgs"></div>
+        </div>
+        <div id="c-lim-sec" style="display:none">
+          <div class="f2">
+            <div class="ff"><label class="fl">Max Akun Buat</label><input type="number" class="fi" id="c-ma" placeholder="∞ kosong=unlimited"></div>
+            <div class="ff"><label class="fl">Storage Limit MB</label><input type="number" class="fi" id="c-sl" placeholder="∞ kosong=unlimited"></div>
+          </div>
+        </div>
+        <div class="ff"><label class="fl">Catatan (opsional)</label><input type="text" class="fi" id="c-nt" placeholder="Misal: pelanggan VIP"></div>
+        <button class="btn bp btn-full" onclick="submitCreate()">✦ Buat Akun Sekarang</button>
+        <div style="height:8px"></div>
+      </div>
+    </div>
+
+    <!-- PAGE SERVERS -->
+    <div id="pg-servers" class="page">
+      <div class="ph"><div class="pt">Servers</div><div class="ps" id="sv-sub">PTERODACTYL</div></div>
+      <div class="srch"><span>🔍</span><input id="sv-q" placeholder="Cari server..." oninput="filterSvr()"></div>
+      <div id="sv-list"></div>
+    </div>
+
+    <!-- PAGE PROFILE -->
+    <div id="pg-profile" class="page">
+      <div class="ph"><div class="pt">Profil</div><div class="ps">AKUN SAYA</div></div>
+      <div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">
+          <div class="uav" id="pf-av" style="width:54px;height:54px;border-radius:15px;font-size:20px"></div>
+          <div><div style="font-size:18px;font-weight:800" id="pf-nm"></div><div style="font-family:var(--mono);font-size:11px;color:var(--t3)" id="pf-em"></div><div style="margin-top:6px" id="pf-rb"></div></div>
+        </div>
+        <div id="pf-info"></div>
+      </div>
+      <div class="sh"><div class="st">📋 Log Aktivitas</div></div>
+      <div style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:14px" id="pf-log">
+        <div class="et">Memuat...</div>
+      </div>
+      <div class="div"></div>
+      <button class="btn br btn-full" onclick="doLogout()">⏻ Keluar</button>
+      <div style="height:8px"></div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav"><div class="nw" id="nw"></div></nav>
+
+  <!-- FAB -->
+  <button class="fab off" id="fab" onclick="fabClick()">＋</button>
+
+</div><!-- /app -->
+
+<!-- ═══ ACTION MENUS & SHEETS ═══ -->
+
+<!-- User action menu -->
+<div class="amov" id="am-ov" onclick="closeAM()"></div>
+<div class="am" id="am">
+  <div class="am-drag"></div>
+  <div class="am-lbl" id="am-lbl">Aksi</div>
+  <div class="ai" id="am-susp" onclick="amDo('suspend')"><div class="aii aio">⏸</div><div><div class="ai-lbl">Suspend Akun</div><div class="ai-dsc">Nonaktifkan sementara</div></div></div>
+  <div class="ai" id="am-unsusp" onclick="amDo('unsuspend')" style="display:none"><div class="aii aig">▶</div><div><div class="ai-lbl">Aktifkan Akun</div><div class="ai-dsc">Cabut suspend</div></div></div>
+  <div class="ai" onclick="amDo('reset')"><div class="aii aic">🔑</div><div><div class="ai-lbl">Reset Password</div><div class="ai-dsc">Ganti password user</div></div></div>
+  <div class="ai" onclick="amDo('detail')"><div class="aii aiy">👁</div><div><div class="ai-lbl">Lihat Detail</div><div class="ai-dsc">Info lengkap akun</div></div></div>
+  <div class="ai" onclick="amDo('delete')"><div class="aii air">🗑</div><div><div class="ai-lbl red">Hapus Akun</div><div class="ai-dsc">Permanen, tidak bisa di-undo</div></div></div>
+</div>
+
+<!-- Server action menu -->
+<div class="am" id="am-sv">
+  <div class="am-drag"></div>
+  <div class="am-lbl" id="am-sv-lbl">Server</div>
+  <div class="ai" id="am-sv-susp" onclick="svDo('suspend')"><div class="aii aio">⏸</div><div><div class="ai-lbl">Suspend</div><div class="ai-dsc">Nonaktifkan sementara</div></div></div>
+  <div class="ai" id="am-sv-unsusp" onclick="svDo('unsuspend')" style="display:none"><div class="aii aig">▶</div><div><div class="ai-lbl">Aktifkan</div><div class="ai-dsc">Cabut suspend</div></div></div>
+  <div class="ai" onclick="svDo('reinstall')"><div class="aii aic">♻</div><div><div class="ai-lbl">Reinstall</div><div class="ai-dsc">Reset ke kondisi awal</div></div></div>
+  <div class="ai" onclick="svDo('delete')"><div class="aii air">🗑</div><div><div class="ai-lbl red">Hapus Server</div><div class="ai-dsc">Force delete, tidak bisa di-undo</div></div></div>
+</div>
+
+<!-- Reset pass sheet -->
+<div class="ovl" id="ov-rp">
+  <div class="sheet">
+    <div class="sh-drag"></div>
+    <div class="sh-hd"><div class="sh-tl">🔑 Reset Password</div><div class="sh-x" onclick="closeSheet('ov-rp')">×</div></div>
+    <div class="sh-bd">
+      <div class="ff"><label class="fl">Password Baru</label><input type="password" class="fi" id="rp-p1" placeholder="Min. 6 karakter"></div>
+      <div class="ff"><label class="fl">Konfirmasi</label><input type="password" class="fi" id="rp-p2" placeholder="Ulangi password"></div>
+    </div>
+    <div class="sh-ft">
+      <button class="btn btn-full" onclick="closeSheet('ov-rp')" style="flex:1">Batal</button>
+      <button class="btn bp btn-full" onclick="submitRP()" style="flex:2">🔑 Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- User detail sheet -->
+<div class="ovl" id="ov-det">
+  <div class="sheet">
+    <div class="sh-drag"></div>
+    <div class="sh-hd"><div class="sh-tl">👁 Detail Akun</div><div class="sh-x" onclick="closeSheet('ov-det')">×</div></div>
+    <div class="sh-bd" id="det-bd"></div>
+  </div>
+</div>
+
+<!-- Create server sheet -->
+<div class="ovl" id="ov-crsv">
+  <div class="sheet">
+    <div class="sh-drag"></div>
+    <div class="sh-hd"><div class="sh-tl">🚀 Server Baru</div><div class="sh-x" onclick="closeSheet('ov-crsv')">×</div></div>
+    <div class="sh-bd">
+      <div class="f2">
+        <div class="ff"><label class="fl">Nama Server</label><input type="text" class="fi" id="sv-nm" placeholder="my-bot"></div>
+        <div class="ff"><label class="fl">User ID Ptero</label><input type="number" class="fi" id="sv-uid" placeholder="1"></div>
+      </div>
+      <div class="f2">
+        <div class="ff"><label class="fl">Nest</label><select class="fs" id="sv-nest" onchange="loadEggs()"><option value="">— Pilih —</option></select></div>
+        <div class="ff"><label class="fl">Egg</label><select class="fs" id="sv-egg"><option value="">— Pilih —</option></select></div>
+      </div>
+      <div class="f2">
+        <div class="ff"><label class="fl">RAM (MB)</label><input type="number" class="fi" id="sv-ram" value="512"></div>
+        <div class="ff"><label class="fl">CPU (%)</label><input type="number" class="fi" id="sv-cpu" value="100"></div>
+      </div>
+      <div class="f2">
+        <div class="ff"><label class="fl">Disk (MB)</label><input type="number" class="fi" id="sv-disk" value="1024"></div>
+        <div class="ff"><label class="fl">Lokasi</label><select class="fs" id="sv-loc"><option value="">— Pilih —</option></select></div>
+      </div>
+      <div class="ff"><label class="fl">Docker Image</label><input type="text" class="fi" id="sv-img" placeholder="ghcr.io/pterodactyl/yolks:nodejs_18"><div class="fh">// Kosong = default egg</div></div>
+    </div>
+    <div class="sh-ft">
+      <button class="btn btn-full" onclick="closeSheet('ov-crsv')" style="flex:1">Batal</button>
+      <button class="btn bp btn-full" onclick="submitSv()" style="flex:2">🚀 Buat</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════
+const RL = {ceo:0,owner:1,pt:2,reseller:3,admin:4,user:5};
+const RL_LBL = {ceo:'CEO',owner:'Owner Panel',pt:'PT Panel',reseller:'Reseller Panel',admin:'Admin Panel',user:'User'};
+const RL_COL = {ceo:'#ff3d6b',owner:'#ff7a2f',pt:'#f5c518',reseller:'#00e09e',admin:'#0ea5e9',user:'#6b6b8a'};
+const RL_ICO = {ceo:'👑',owner:'🏢',pt:'🏭',reseller:'🛍',admin:'⚙',user:'👤'};
+const RL_DESC = {
+  owner:    'Buat PT, Reseller, Admin, User',
+  pt:       'Buat Reseller, Admin, User — paket bebas',
+  reseller: 'Buat Admin & User — paket 1GB–Unlimited',
+  admin:    'Buat User saja',
+  user:     'Tidak bisa buat akun',
+};
+const CAN_CREATE = {
+  ceo:['owner','pt','reseller','admin','user'],
+  owner:['pt','reseller','admin','user'],
+  pt:['reseller','admin','user'],
+  reseller:['admin','user'],
+  admin:['user'],
+  user:[]
+};
+const PKGS = [
+  {label:'1 GB',  mb:1024,  ram:512,  cpu:100},
+  {label:'2 GB',  mb:2048,  ram:512,  cpu:100},
+  {label:'5 GB',  mb:5120,  ram:1024, cpu:150},
+  {label:'10 GB', mb:10240, ram:2048, cpu:200},
+  {label:'Unlimited', mb:null, ram:4096, cpu:400},
+];
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let ME=null, CUR='dash', USERS=[], SRVS=[], ACT_UID=null, ACT_UDATA=null, ACT_SID=null;
+let SEL_ROLE=null, SEL_PKG=null, ROLE_FILTER='all';
+
+// ════════════════════════════════════════
+// API
+// ════════════════════════════════════════
+async function api(method, path, body=null) {
+  const token = localStorage.getItem('jwt_token');
+  const hdrs  = {'Content-Type':'application/json'};
+  if (token) hdrs['Authorization'] = 'Bearer ' + token;
+  const opts = {method, headers: hdrs};
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(path, opts);
+    const ct = r.headers.get('content-type')||'';
+    if (!ct.includes('application/json')) {
+      const text = await r.text();
+      return {error: 'Server error: ' + text.substring(0,120)};
+    }
+    return await r.json();
+  } catch(e) { return {error: e.message}; }
+}
+
+const GET  = (p)       => api('GET', p);
+const POST = (p, b)    => api('POST', p, b);
+const DEL  = (p)       => api('DELETE', p);
+
+// ════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════
+function toast(msg, type='inf') {
+  const ic = {ok:'✓',err:'✕',inf:'●'}[type]||'●';
+  const cl = {ok:'tok',err:'terr',inf:'tinf'}[type]||'tinf';
+  const el = document.createElement('div');
+  el.className=`toast ${cl}`;
+  el.innerHTML=`<span>${ic}</span><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 3400);
+}
+
+// ════════════════════════════════════════
+// LOGIN / LOGOUT
+// ════════════════════════════════════════
+async function doLogin() {
+  const username=document.getElementById('l-u').value.trim();
+  const password=document.getElementById('l-p').value;
+  const err=document.getElementById('l-err');
+  const btn=document.getElementById('l-btn');
+  err.style.display='none';
+  if (!username||!password){err.textContent='Isi username dan password';err.style.display='block';return;}
+  btn.textContent='Masuk...'; btn.disabled=true;
+  const res = await POST('/api/login', {username, password});
+  // JWT: save token to localStorage
+  btn.textContent='Masuk →'; btn.disabled=false;
+  if (res.error){err.textContent=res.error;err.style.display='block';return;}
+  if (res.token) localStorage.setItem('jwt_token', res.token);
+  ME = res.user;
+  bootApp();
+}
+
+async function doLogout() {
+  await POST('/api/logout');
+  localStorage.removeItem('jwt_token');
+  ME=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+}
+
+document.getElementById('l-p').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('l-u').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
+
+// ════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════
+async function checkSession() {
+  if (!localStorage.getItem('jwt_token')) return;
+  const res = await GET('/api/me');
+  if (res.user) { ME=res.user; bootApp(); }
+  else localStorage.removeItem('jwt_token');
+}
+
+function bootApp() {
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  // Set accent color per role
+  const col = RL_COL[ME.role]||'#00e09e';
+  document.documentElement.style.setProperty('--ac', col);
+  buildHeader();
+  buildNav();
+  loadPage('dash');
+}
+
+function buildHeader() {
+  const col=RL_COL[ME.role]||'#888';
+  const init=(ME.username?.[0]||'?').toUpperCase();
+  const av=document.getElementById('h-av');
+  av.style.background=`linear-gradient(135deg,${col},${col}88)`;
+  av.textContent=init;
+  document.getElementById('h-nm').textContent=ME.username;
+  const rl=document.getElementById('h-rl');
+  rl.textContent=RL_LBL[ME.role]||ME.role;
+  rl.style.color=col;
+}
+
+// ════════════════════════════════════════
+// NAV
+// ════════════════════════════════════════
+const TABS = [
+  {id:'dash',    icon:'⬡', label:'Beranda',roles:['ceo','owner','pt','reseller','admin','user']},
+  {id:'users',   icon:'👥', label:'Downline',roles:['ceo','owner','pt','reseller','admin']},
+  {id:'create',  icon:'✦',  label:'Buat',   roles:['ceo','owner','pt','reseller','admin']},
+  {id:'servers', icon:'🖥',  label:'Server', roles:['ceo','owner','pt']},
+  {id:'profile', icon:'👤', label:'Profil', roles:['ceo','owner','pt','reseller','admin','user']},
+];
+
+function buildNav() {
+  const tabs = TABS.filter(t=>t.roles.includes(ME.role));
+  document.getElementById('nw').innerHTML = tabs.map(t=>`
+    <div class="nt${t.id===CUR?' on':''}" id="nt-${t.id}" onclick="goPage('${t.id}')">
+      <div class="ni">${t.icon}</div>
+      <div class="nl">${t.label}</div>
+    </div>`).join('');
+  // FAB
+  const showFab = ['dash','users','servers','create'].includes(CUR) && ME.role!=='user';
+  document.getElementById('fab').classList.toggle('off', !showFab);
+}
+
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  const pg=document.getElementById('pg-'+name);
+  if(!pg)return;
+  pg.classList.add('on');
+  document.getElementById('nt-'+name)?.classList.add('on');
+  document.getElementById('scroll').scrollTop=0;
+  CUR=name;
+  buildNav();
+  loadPage(name);
+}
+
+function loadPage(name) {
+  if(name==='dash')    loadDash();
+  if(name==='users')   loadUsers();
+  if(name==='create')  buildCreate();
+  if(name==='servers') loadServers();
+  if(name==='profile') loadProfile();
+}
+
+function fabClick() {
+  if(['dash','users','create'].includes(CUR)) goPage('create');
+  else if(CUR==='servers') openCrSv();
+}
+
+// ════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════
+async function loadDash() {
+  document.getElementById('d-greet').textContent=`Halo, ${ME.username} 👋`;
+  document.getElementById('d-sub').textContent=RL_LBL[ME.role].toUpperCase()+' DASHBOARD';
+  document.getElementById('d-stats').innerHTML=
+    `<div class="sc a skel" style="height:86px"></div><div class="sc b skel" style="height:86px"></div><div class="sc c skel" style="height:86px"></div><div class="sc d skel" style="height:86px"></div>`;
+
+  const res = await GET('/api/stats');
+  if(res.error){toast('Gagal load stats','err');return;}
+
+  const isBig = ['ceo','owner','pt'].includes(ME.role);
+  let cards;
+  if(ME.role==='ceo') {
+    cards=[
+      {l:'Total Akun', v:res.totalUsers||0, c:'a', i:'👥'},
+      {l:'PT Panel',   v:res.byRole?.pt||0, c:'b', i:'🏭'},
+      {l:'Servers',    v:res.ptServers||0,  c:'c', i:'🖥'},
+      {l:'Suspended',  v:res.suspended||0,  c:'d', i:'⏸'},
+    ];
+  } else if(isBig) {
+    cards=[
+      {l:'Downline',   v:res.totalUsers||0,  c:'a', i:'👥'},
+      {l:'Reseller',   v:res.byRole?.reseller||0, c:'b', i:'🛍'},
+      {l:'Servers',    v:res.ptServers||0,   c:'c', i:'🖥'},
+      {l:'Suspended',  v:res.suspended||0,   c:'d', i:'⏸'},
+    ];
+  } else {
+    cards=[
+      {l:'Downline',   v:res.totalUsers||0,            c:'a', i:'👥'},
+      {l:'Suspended',  v:res.suspended||0,             c:'b', i:'⏸'},
+      {l:'Slot Sisa',  v:ME.maxAccounts?(ME.maxAccounts-ME.accountsUsed):'∞', c:'c', i:'🎯'},
+      {l:'Dibuat',     v:ME.accountsUsed||0,           c:'d', i:'📊'},
+    ];
+  }
+
+  document.getElementById('d-stats').innerHTML = cards.map(c=>`
+    <div class="sc ${c.c}">
+      <div class="sl">${c.l}</div>
+      <div class="sv">${c.v}</div>
+      <div class="sic">${c.i}</div>
+    </div>`).join('');
+
+  // Hierarchy hint
+  const can = CAN_CREATE[ME.role]||[];
+  if(can.length) {
+    document.getElementById('d-extra').innerHTML=`
+      <div class="sh"><div class="st">⛓ Role yang Bisa Kamu Buat</div><div class="sl2" onclick="goPage('create')">Buat →</div></div>
+      <div class="hier">${can.map((r,i)=>`
+        <div class="hr-row">
+          <div class="hr-dot" style="background:${RL_COL[r]}">${RL_ICO[r]}</div>
+          <div><div class="hr-name">${RL_LBL[r]}</div><div class="hr-desc">${RL_DESC[r]||'—'}</div></div>
+        </div>`).join('')}
+      </div>`;
+  }
+}
+
+// ════════════════════════════════════════
+// USERS
+// ════════════════════════════════════════
+async function loadUsers() {
+  const box=document.getElementById('u-list');
+  box.innerHTML=`<div class="skel" style="height:88px;margin-bottom:9px"></div><div class="skel" style="height:88px;margin-bottom:9px"></div><div class="skel" style="height:88px;margin-bottom:9px"></div>`;
+  buildFilters();
+  const res = await GET('/api/users');
+  USERS = res.data||[];
+  document.getElementById('u-sub').textContent=`${USERS.length} AKUN`;
+  renderUsers(applyFilter(USERS));
+}
+
+function buildFilters() {
+  const can = ['all',...(CAN_CREATE[ME.role]||[])];
+  document.getElementById('u-filters').innerHTML = can.map(r=>`
+    <div class="fp${ROLE_FILTER===r?' on':''}" onclick="setRF('${r}')">${r==='all'?'Semua':RL_LBL[r]}</div>`).join('');
+}
+
+function setRF(r) { ROLE_FILTER=r; buildFilters(); renderUsers(applyFilter(USERS)); }
+
+function filterUsers() {
+  renderUsers(applyFilter(USERS));
+}
+
+function applyFilter(list) {
+  const q=document.getElementById('u-q')?.value.toLowerCase()||'';
+  return list.filter(u=>{
+    const matchR = ROLE_FILTER==='all' || u.role===ROLE_FILTER;
+    const matchQ = !q || u.username?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q);
+    return matchR && matchQ;
+  });
+}
+
+function renderUsers(list) {
+  const box=document.getElementById('u-list');
+  if(!list.length){box.innerHTML=`<div class="empty"><div class="ei">👥</div><div class="et">tidak ada akun</div></div>`;return;}
+  box.innerHTML = list.map(u=>{
+    const init=(u.username?.[0]||'?').toUpperCase();
+    const stor = u.storageLimit ? Math.round(u.storageLimit/1024*10)/10+'GB' : '∞';
+    const acc  = u.maxAccounts  ? u.accountsUsed+'/'+u.maxAccounts : '∞';
+    const pct  = u.storageLimit ? Math.min(100,(u.storageUsed||0)/u.storageLimit*100) : 15;
+    return `<div class="ucard" onclick="openAM(${u.id})">
+      <div class="uc-body">
+        <div class="uc-top">
+          <div class="uav uav-${u.role}">${init}</div>
+          <div style="flex:1;min-width:0">
+            <div class="uname">${u.username}</div>
+            <div class="uemail">${u.email}</div>
+            <div class="umeta">
+              <span class="rb rb-${u.role}">${RL_LBL[u.role]}</span>
+              <span class="rb ${u.status==='active'?'s-active':'s-suspended'}">${u.status}</span>
+            </div>
+          </div>
+        </div>
+        <div class="pbar">
+          <span class="pbl">STOR</span>
+          <div class="pbt"><div class="pbf" style="width:${pct}%"></div></div>
+          <span class="pbv">${stor}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:7px">
+          <span class="chip">👥 ${acc} akun</span>
+          <span class="chip">📅 ${(u.createdAt||'').substring(0,10)||'—'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// USER ACTION MENU
+// ════════════════════════════════════════
+function openAM(id) {
+  ACT_UID=id;
+  ACT_UDATA=USERS.find(u=>u.id===id);
+  if(!ACT_UDATA)return;
+  document.getElementById('am-lbl').textContent=`@${ACT_UDATA.username} — ${RL_LBL[ACT_UDATA.role]}`;
+  const s=ACT_UDATA.status==='suspended';
+  document.getElementById('am-susp').style.display=s?'none':'flex';
+  document.getElementById('am-unsusp').style.display=s?'flex':'none';
+  document.getElementById('am').classList.add('on');
+  document.getElementById('am-ov').classList.add('on');
+}
+
+function closeAM() {
+  document.getElementById('am').classList.remove('on');
+  document.getElementById('am-sv').classList.remove('on');
+  document.getElementById('am-ov').classList.remove('on');
+}
+
+async function amDo(type) {
+  closeAM();
+  if(type==='suspend') {
+    const r=await POST(`/api/users/${ACT_UID}/suspend`);
+    r.success?toast('Akun di-suspend','ok'):toast(r.error||'Gagal','err');
+    loadUsers();
+  } else if(type==='unsuspend') {
+    const r=await POST(`/api/users/${ACT_UID}/unsuspend`);
+    r.success?toast('Akun diaktifkan','ok'):toast(r.error||'Gagal','err');
+    loadUsers();
+  } else if(type==='delete') {
+    if(!confirm(`Hapus @${ACT_UDATA?.username}?`))return;
+    const r=await DEL(`/api/users/${ACT_UID}`);
+    r.success?toast('Akun dihapus','ok'):toast(r.error||'Gagal','err');
+    USERS=[];loadUsers();loadDash();
+  } else if(type==='reset') {
+    document.getElementById('rp-p1').value='';
+    document.getElementById('rp-p2').value='';
+    openSheet('ov-rp');
+  } else if(type==='detail') {
+    openDetail();
+  }
+}
+
+async function submitRP() {
+  const p1=document.getElementById('rp-p1').value;
+  const p2=document.getElementById('rp-p2').value;
+  if(p1.length<6){toast('Min. 6 karakter','err');return;}
+  if(p1!==p2){toast('Password tidak cocok','err');return;}
+  const r=await POST(`/api/users/${ACT_UID}/reset-password`,{password:p1});
+  r.success?toast('Password direset!','ok'):toast(r.error||'Gagal','err');
+  if(r.success)closeSheet('ov-rp');
+}
+
+function openDetail() {
+  const u=ACT_UDATA;if(!u)return;
+  document.getElementById('det-bd').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div class="uav uav-${u.role}" style="width:52px;height:52px;border-radius:14px;font-size:19px">${u.username[0].toUpperCase()}</div>
+      <div><div style="font-size:17px;font-weight:800">${u.username}</div><div style="font-family:var(--mono);font-size:10px;color:var(--t3)">${u.email}</div><div style="margin-top:6px"><span class="rb rb-${u.role}">${RL_LBL[u.role]}</span></div></div>
+    </div>
+    <div class="ir"><span class="ik">ID</span><span class="iv">#${u.id}</span></div>
+    <div class="ir"><span class="ik">Status</span><span class="rb ${u.status==='active'?'s-active':'s-suspended'}">${u.status}</span></div>
+    <div class="ir"><span class="ik">Dibuat oleh</span><span class="iv">@${u.parentUsername||'system'}</span></div>
+    <div class="ir"><span class="ik">Storage</span><span class="iv">${u.storageLimit?Math.round(u.storageLimit/1024*10)/10+' GB':'∞ Unlimited'}</span></div>
+    <div class="ir"><span class="ik">Akun Buat</span><span class="iv">${u.accountsUsed||0} / ${u.maxAccounts||'∞'}</span></div>
+    <div class="ir"><span class="ik">Join</span><span class="iv">${(u.createdAt||'').substring(0,10)}</span></div>
+    ${u.notes?`<div class="ir"><span class="ik">Catatan</span><span class="iv">${u.notes}</span></div>`:''}
+  `;
+  openSheet('ov-det');
+}
+
+// ════════════════════════════════════════
+// CREATE ACCOUNT
+// ════════════════════════════════════════
+function buildCreate() {
+  const can=CAN_CREATE[ME.role]||[];
+  document.getElementById('cr-sub').textContent=`BISA BUAT ${can.length} ROLE`;
+  document.getElementById('cr-form').style.display='none';
+  SEL_ROLE=null; SEL_PKG=null;
+  ['c-u','c-e','c-fn','c-ln','c-pw','c-nt','c-ma','c-sl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+
+  document.getElementById('cr-picker').innerHTML=`
+    <div class="rpick">${can.map(r=>`
+      <div class="rpc" id="rp-${r}" onclick="pickRole('${r}')">
+        <div class="rpc-icon" style="background:${RL_COL[r]}22;color:${RL_COL[r]}">${RL_ICO[r]}</div>
+        <div><div class="rpc-name" style="color:${RL_COL[r]}">${RL_LBL[r]}</div><div class="rpc-desc">${RL_DESC[r]||'—'}</div></div>
+        <div class="rpc-arr">›</div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function pickRole(role) {
+  SEL_ROLE=role; SEL_PKG=null;
+  document.querySelectorAll('.rpc').forEach(el=>el.style.borderColor='var(--b1)');
+  const el=document.getElementById('rp-'+role);
+  if(el)el.style.borderColor=RL_COL[role];
+
+  document.getElementById('cr-form').style.display='block';
+  document.getElementById('scroll').scrollBy({top:400,behavior:'smooth'});
+
+  // Package section
+  const showPkg=(role==='user'||role==='admin')&&['reseller','pt','owner','ceo'].includes(ME.role);
+  document.getElementById('c-pkg-sec').style.display=showPkg?'block':'none';
+  if(showPkg)buildPkgs();
+
+  // Limit section
+  const showLim=['owner','pt','reseller','admin'].includes(role)&&['ceo','owner','pt'].includes(ME.role);
+  document.getElementById('c-lim-sec').style.display=showLim?'block':'none';
+}
+
+function buildPkgs() {
+  SEL_PKG=null;
+  document.getElementById('c-pkgs').innerHTML=PKGS.map((p,i)=>`
+    <div class="pkg" id="pk-${i}" onclick="pickPkg(${i})">
+      <div class="pkg-n">${p.label}</div>
+      <div class="pkg-tag">STORAGE</div>
+      <div class="pkg-specs">
+        <div class="pkg-s">🧠 ${p.ram} MB RAM</div>
+        <div class="pkg-s">⚡ ${p.cpu}% CPU</div>
+        <div class="pkg-s">💾 ${p.mb?p.mb+' MB':'Unlimited'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function pickPkg(i) {
+  SEL_PKG=PKGS[i];
+  document.querySelectorAll('.pkg').forEach(el=>el.classList.remove('on'));
+  document.getElementById('pk-'+i)?.classList.add('on');
+}
+
+async function submitCreate() {
+  const username=document.getElementById('c-u').value.trim();
+  const email   =document.getElementById('c-e').value.trim();
+  const firstName=document.getElementById('c-fn').value.trim();
+  const lastName =document.getElementById('c-ln').value.trim();
+  const password =document.getElementById('c-pw').value;
+  const notes    =document.getElementById('c-nt').value.trim();
+  const maxAccounts=document.getElementById('c-ma').value||null;
+  const storageLimit=SEL_PKG?.mb||(document.getElementById('c-sl').value||null);
+
+  if(!username||!email||!firstName||!password||!SEL_ROLE){toast('Isi semua field!','err');return;}
+  if(password.length<6){toast('Password min. 6 karakter','err');return;}
+
+  const res=await POST('/api/users',{
+    username,email,password,firstName,lastName,notes,
+    role:SEL_ROLE,
+    maxAccounts:maxAccounts?parseInt(maxAccounts):null,
+    storageLimit:storageLimit?parseInt(storageLimit):null,
+  });
+
+  if(res.success){
+    toast(`Akun @${username} (${RL_LBL[SEL_ROLE]}) dibuat!`,'ok');
+    buildCreate();
+    USERS=[];
+    loadDash();
+  } else {
+    toast(res.error||'Gagal buat akun','err');
+  }
+}
+
+// ════════════════════════════════════════
+// SERVERS
+// ════════════════════════════════════════
+async function loadServers() {
+  if(!['ceo','owner','pt'].includes(ME.role))return;
+  const box=document.getElementById('sv-list');
+  box.innerHTML=`<div class="skel" style="height:100px;margin-bottom:9px"></div><div class="skel" style="height:100px;margin-bottom:9px"></div>`;
+  const res=await GET('/api/ptero/servers');
+  SRVS=res?.data||[];
+  document.getElementById('sv-sub').textContent=`${SRVS.length} SERVER`;
+  renderSvr(SRVS);
+}
+
+function filterSvr(){
+  const q=document.getElementById('sv-q').value.toLowerCase();
+  renderSvr(SRVS.filter(s=>s.attributes?.name?.toLowerCase().includes(q)));
+}
+
+function renderSvr(list){
+  const box=document.getElementById('sv-list');
+  if(!list.length){box.innerHTML=`<div class="empty"><div class="ei">🖥</div><div class="et">tidak ada server</div></div>`;return;}
+  box.innerHTML=list.map(s=>{
+    const a=s.attributes,susp=a.suspended;
+    return`<div class="svcard" onclick="openSvAM(${a.id},'${a.name.replace(/'/g,"\\'")}',${susp})">
+      <div class="svc-body">
+        <div class="svc-top">
+          <div><div class="svname">${a.name}</div><div class="svuuid">${a.uuid?.substring(0,12)||''}...</div></div>
+          <span class="rb ${susp?'s-suspended':'s-active'}">${susp?'⏸ Suspended':'● Active'}</span>
+        </div>
+        <div class="svchips">
+          <span class="chip">🧠 ${a.limits?.memory??0}MB</span>
+          <span class="chip">⚡ ${a.limits?.cpu??0}%</span>
+          <span class="chip">💾 ${a.limits?.disk??0}MB</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSvAM(id,name,susp){
+  ACT_SID=id;
+  document.getElementById('am-sv-lbl').textContent=name;
+  document.getElementById('am-sv-susp').style.display=susp?'none':'flex';
+  document.getElementById('am-sv-unsusp').style.display=susp?'flex':'none';
+  document.getElementById('am-sv').classList.add('on');
+  document.getElementById('am-ov').classList.add('on');
+}
+
+async function svDo(type){
+  closeAM();
+  let r;
+  if(type==='delete'){if(!confirm('Hapus server ini?'))return;r=await DEL(`/api/ptero/servers/${ACT_SID}`);}
+  else if(type==='suspend')r=await POST(`/api/ptero/servers/${ACT_SID}/suspend`);
+  else if(type==='unsuspend')r=await POST(`/api/ptero/servers/${ACT_SID}/unsuspend`);
+  else if(type==='reinstall')r=await POST(`/api/ptero/servers/${ACT_SID}/reinstall`);
+  (r?.success)?toast('Berhasil!','ok'):toast(r?.error||'Gagal','err');
+  loadServers();
+}
+
+async function openCrSv(){
+  openSheet('ov-crsv');
+  const[nR,lR]=await Promise.all([GET('/api/ptero/nests'),GET('/api/ptero/locations')]);
+  const ns=document.getElementById('sv-nest');
+  ns.innerHTML='<option value="">— Pilih Nest —</option>';
+  (nR?.data||[]).forEach(n=>ns.innerHTML+=`<option value="${n.attributes.id}">${n.attributes.name}</option>`);
+  const ls=document.getElementById('sv-loc');
+  ls.innerHTML='<option value="">— Pilih Lokasi —</option>';
+  (lR?.data||[]).forEach(l=>ls.innerHTML+=`<option value="${l.attributes.id}">${l.attributes.long||l.attributes.short}</option>`);
+}
+
+async function loadEggs(){
+  const nestId=document.getElementById('sv-nest').value,es=document.getElementById('sv-egg');
+  if(!nestId)return;
+  es.innerHTML='<option>Loading...</option>';
+  const r=await GET(`/api/ptero/eggs?nest_id=${nestId}`);
+  es.innerHTML='<option value="">— Pilih Egg —</option>';
+  (r?.data||[]).forEach(e=>es.innerHTML+=`<option value="${e.attributes.id}" data-img="${e.attributes.docker_image}">${e.attributes.name}</option>`);
+  es.onchange=()=>{const o=es.options[es.selectedIndex];if(o)document.getElementById('sv-img').value=o.dataset.img||'';};
+}
+
+async function submitSv(){
+  const nm=document.getElementById('sv-nm').value.trim();
+  const uid=parseInt(document.getElementById('sv-uid').value);
+  const egg=parseInt(document.getElementById('sv-egg').value);
+  const ram=parseInt(document.getElementById('sv-ram').value)||512;
+  const cpu=parseInt(document.getElementById('sv-cpu').value)||100;
+  const disk=parseInt(document.getElementById('sv-disk').value)||1024;
+  const loc=parseInt(document.getElementById('sv-loc').value)||1;
+  const img=document.getElementById('sv-img').value.trim();
+  if(!nm||!uid||!egg){toast('Isi nama, user ID, egg!','err');return;}
+  const r=await POST('/api/ptero/servers',{name:nm,user:uid,egg,docker_image:img||undefined,limits:{memory:ram,swap:0,disk,io:500,cpu},feature_limits:{databases:5,backups:3,allocations:5},environment:{},deploy:{locations:[loc],dedicated_ip:false,port_range:[]}});
+  if(r?.object==='server'){toast(`Server "${nm}" dibuat! 🚀`,'ok');closeSheet('ov-crsv');loadServers();}
+  else toast(r?.errors?.[0]?.detail||'Gagal','err');
+}
+
+// ════════════════════════════════════════
+// PROFILE
+// ════════════════════════════════════════
+async function loadProfile(){
+  const r=ME.role,col=RL_COL[r];
+  const init=(ME.username?.[0]||'?').toUpperCase();
+  const av=document.getElementById('pf-av');
+  av.className=`uav uav-${r}`;
+  av.style.cssText='width:54px;height:54px;border-radius:15px;font-size:20px';
+  av.textContent=init;
+  document.getElementById('pf-nm').textContent=`${ME.firstName||''} ${ME.lastName||''}`.trim()||ME.username;
+  document.getElementById('pf-em').textContent=ME.email;
+  document.getElementById('pf-rb').innerHTML=`<span class="rb rb-${r}">${RL_LBL[r]}</span>`;
+  document.getElementById('pf-info').innerHTML=`
+    <div class="ir"><span class="ik">Username</span><span class="iv">@${ME.username}</span></div>
+    <div class="ir"><span class="ik">Role</span><span class="iv" style="color:${col}">${RL_LBL[r]}</span></div>
+    <div class="ir"><span class="ik">Status</span><span class="rb s-active">Active</span></div>
+    <div class="ir"><span class="ik">Akun Dibuat</span><span class="iv">${ME.accountsUsed||0} / ${ME.maxAccounts||'∞'}</span></div>
+    <div class="ir"><span class="ik">Storage</span><span class="iv">${ME.storageLimit?Math.round(ME.storageLimit/1024*10)/10+' GB':'∞ Unlimited'}</span></div>
+  `;
+  const logRes=await GET('/api/logs');
+  const logs=logRes.data||[];
+  const LICO={login:'🔓',create_user:'👤',delete_user:'🗑',suspend_user:'⏸',unsuspend_user:'▶',reset_password:'🔑'};
+  document.getElementById('pf-log').innerHTML=logs.length
+    ?logs.map(l=>`<div class="li"><div class="li-ic">${LICO[l.action]||'📋'}</div><div><div class="li-ac">${l.action.replace(/_/g,' ')}</div><div class="li-mt">${l.detail||'—'} · ${(l.createdAt||'').substring(0,16)}</div></div></div>`).join('')
+    :`<div class="et">Belum ada aktivitas</div>`;
+}
+
+// ════════════════════════════════════════
+// SHEET
+// ════════════════════════════════════════
+function openSheet(id){document.getElementById(id).classList.add('on');document.body.style.overflow='hidden';}
+function closeSheet(id){document.getElementById(id).classList.remove('on');document.body.style.overflow='';}
+document.querySelectorAll('.ovl').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeSheet(o.id);}));
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+checkSession();
+</script>
+</body>
+</html>
